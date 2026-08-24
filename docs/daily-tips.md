@@ -1,0 +1,14 @@
+# Hub & model-card tips of the day
+
+> Maintained by `scripts/daily_update.py` (Daily Green automation) — one
+> dated, non-empty metadata tip per day, rotated from the pool in
+> `scripts/tips_pool.json`. Pause by creating a `.daily-pause` file in the
+> repo root, or unload the scheduler job (see README, Daily Green).
+
+
+## 2026-08-24 — Tip of the day: License before code
+
+A repo with no license is legally unusable for most companies. Set the license tag in Hub settings AND in the card frontmatter.
+
+> `hf-hub-lint org/model --format markdown`
+
