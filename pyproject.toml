@@ -1,0 +1,34 @@
+[project]
+name = "hf-hub-lint"
+version = "0.1.0"
+description = "Lint Hugging Face Hub repositories: model-card completeness, license, metadata hygiene, and config sanity — deterministic checks, zero API keys."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "pxlcrtiv" }]
+keywords = ["huggingface", "model-card", "lint", "mlops", "metadata"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.scripts]
+hf-hub-lint = "hf_hub_lint.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["hf_hub_lint*"]
+
+[tool.setuptools.package-data]
+"hf_hub_lint.data" = ["fixtures/*.json"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

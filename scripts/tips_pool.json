@@ -1,0 +1,29 @@
+{
+  "note": "Curated Hub/metadata best-practice tips, one per day, rotated by date. Add entries; keep titles short and bodies one paragraph.",
+  "tips": [
+    {"title": "Model cards are your front page", "body": "The README.md of a Hub repo renders before anything else — a card with Model Details, Uses, and Limitations sections converts viewers into users.", "command": "hf-hub-lint org/model"},
+    {"title": "License before code", "body": "A repo with no license is legally unusable for most companies. Set the license tag in Hub settings AND in the card frontmatter.", "command": "hf-hub-lint org/model --format markdown"},
+    {"title": "Tags drive discoverability", "body": "Hub search, filters, and the Models/Datasets pages rank by tags. Aim for 5+ (framework, task, modality, language, license).", "command": ""},
+    {"title": "frontmatter = structured metadata", "body": "YAML frontmatter in the card is parsed by the Hub into fields (license, tags, metrics) that APIs and widgets use. Keep keys lowercase.", "command": ""},
+    {"title": "library_name unlocks auto-loading", "body": "Setting library_name (transformers, diffusers...) lets the Hub offer 'Use in Transformers' code snippets and auto-download.", "command": ""},
+    {"title": "config.json is not optional", "body": "Gated loading, pipelines, and most frameworks require config.json with model_type. Always save_pretrained() it.", "command": ""},
+    {"title": "State metrics or stay silent", "body": "A claimed accuracy with no eval set or methodology is worse than none. Report metric, dataset, and split together.", "command": ""},
+    {"title": "base_model is a legal field now", "body": "Derivative models should declare base_model — licensing and attribution of fine-tunes depend on it.", "command": ""},
+    {"title": "Datasets are part of reproducibility", "body": "Link the training data via the datasets field. It is the single biggest trust signal for ML repos.", "command": ""},
+    {"title": "pipeline_tag == instant demo", "body": "Models with pipeline_tag render inference widgets on the Hub page — the fastest 'wow' for visitors.", "command": ""},
+    {"title": "Spaces need an explicit SDK", "body": "sdk: streamlit | gradio | static | docker | custom in frontmatter; an unbuildable Space is a dead link.", "command": ""},
+    {"title": "HTTPS or it didn't happen", "body": "Plain http:// links in cards get flagged by scanners and often blocked by corporate proxies. Force https.", "command": ""},
+    {"title": "Lint before you publish", "body": "Run hf-hub-lint on a repo before sharing it — a 90+ score card takes 5 minutes and removes an obvious first impression problem.", "command": "hf-hub-lint --fixture examples/fixture_model.json"},
+    {"title": "Gated repos still need cards", "body": "A gated model's card is public even when weights are not — reviewers decide whether to request access based on it.", "command": ""},
+    {"title": "Deterministic linting scales", "body": "Script hf-hub-lint --json into CI so card regressions fail the build before they ship to the Hub.", "command": "hf-hub-lint org/model --format json"},
+    {"title": "One model card template", "body": "Copy an excellent card (e.g. any top-100 model) and adapt it. The Sections check here flags what a template usually has.", "command": ""},
+    {"title": "Inference widgets need examples", "body": "Add a widget example (sample input) to the card so the live widget shows real output on first load.", "command": ""},
+    {"title": "Version your Hub repo", "body": "Use git tags on Hub repos; the API exposes them and downstream users pin versions.", "command": ""},
+    {"title": "Dataset cards need provenance", "body": "Include collection method, date, and license of source data — the #1 review question for datasets.", "command": ""},
+    {"title": "Keep README encoding sane", "body": "UTF-8, no BOM, LF endings. Broken encodings make the card render garbled on the Hub.", "command": ""},
+    {"title": "Emoji are fine, noise is not", "body": "A banner emoji or two is OK; a wall of them hurts searchability and looks spammy to reviewers.", "command": ""},
+    {"title": "CI-lint your own docs", "body": "Add the linter to a pre-commit hook; catch CARD_TRIM before your README becomes a stub.", "command": "pip install hf-hub-lint"},
+    {"title": "The score is a heuristic", "body": "hf-hub-lint scores metadata hygiene, not model quality. Use it as a checklist, not a judgment of the artifact.", "command": ""},
+    {"title": "Metadata debt compounds", "body": "Fix metadata when the repo is fresh; nobody retrofits a model card on a 2-year-old repo.", "command": "hf-hub-lint --strict org/model"}
+  ]
+}

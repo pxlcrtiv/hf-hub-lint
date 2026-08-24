@@ -1,0 +1,9 @@
+{
+  "repo_id": "acme/demo-space",
+  "type": "space",
+  "card": "# Demo Space\n\nA Streamlit app that shows stuff.\n\nVery short card but present enough for the space check set.\n",
+  "meta": {
+    "sdk": "plaintext"
+  },
+  "files": ["app.py"]
+}

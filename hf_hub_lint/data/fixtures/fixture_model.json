@@ -1,0 +1,13 @@
+{
+  "repo_id": "acme/starter-model",
+  "type": "model",
+  "card": "---\nlicense: mit\nlibrary_name: transformers\npipeline_tag: text-classification\ntags: [nlp, sentiment, transformers]\n---\n\n# Starter Model\n\nA tiny sentiment model. See http://example.com/docs for details.\n\n## Model Details\n\nTrained on 1k samples.\n\n## Uses\n\nSentiment analysis demos.\n\n## Limitations\n\nToy model only.\n",
+  "meta": {
+    "modelId": "acme/starter-model",
+    "license": "mit",
+    "library_name": "transformers",
+    "pipeline_tag": "text-classification",
+    "tags": ["nlp", "sentiment", "transformers", "pytorch"]
+  },
+  "files": ["README.md", "config.json", "model.safetensors"]
+}

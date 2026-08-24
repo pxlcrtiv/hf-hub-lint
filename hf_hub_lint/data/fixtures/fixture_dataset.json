@@ -1,0 +1,9 @@
+{
+  "repo_id": "acme/raw-scrape",
+  "type": "dataset",
+  "card": "This dataset was scraped from the web. No license attached yet.\n\n## Model Details\n\nCollected 2024.\n",
+  "meta": {
+    "tags": ["dataset"]
+  },
+  "files": ["data.parquet"]
+}

@@ -1,0 +1,2 @@
+# Runtime dependencies: NONE — the linter is pure Python stdlib.
+# The only optional dev tools are pytest (tests) and ruff (lint).
