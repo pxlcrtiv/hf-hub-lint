@@ -177,6 +177,8 @@ def main() -> int:
         log(f"ERROR — pool file missing: {POOL_PATH}")
         return 1
     pool = json.loads(POOL_PATH.read_text(encoding="utf-8"))
+    if isinstance(pool, dict):  # allow {note: ..., tips: [...]} wrappers
+        pool = pool.get("tips", [])
     if not pool:
         log("ERROR — pool file is empty")
         return 1
