@@ -17,3 +17,8 @@ A repo with no license is legally unusable for most companies. Set the license t
 
 Hub search, filters, and the Models/Datasets pages rank by tags. Aim for 5+ (framework, task, modality, language, license).
 
+
+## 2026-08-26 — Tip of the day: frontmatter = structured metadata
+
+YAML frontmatter in the card is parsed by the Hub into fields (license, tags, metrics) that APIs and widgets use. Keep keys lowercase.
+
