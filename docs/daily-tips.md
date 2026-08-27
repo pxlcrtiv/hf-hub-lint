@@ -22,3 +22,8 @@ Hub search, filters, and the Models/Datasets pages rank by tags. Aim for 5+ (fra
 
 YAML frontmatter in the card is parsed by the Hub into fields (license, tags, metrics) that APIs and widgets use. Keep keys lowercase.
 
+
+## 2026-08-27 — Tip of the day: library_name unlocks auto-loading
+
+Setting library_name (transformers, diffusers...) lets the Hub offer 'Use in Transformers' code snippets and auto-download.
+
