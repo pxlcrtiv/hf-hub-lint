@@ -32,3 +32,8 @@ Setting library_name (transformers, diffusers...) lets the Hub offer 'Use in Tra
 
 Gated loading, pipelines, and most frameworks require config.json with model_type. Always save_pretrained() it.
 
+
+## 2026-08-29 — Tip of the day: State metrics or stay silent
+
+A claimed accuracy with no eval set or methodology is worse than none. Report metric, dataset, and split together.
+
