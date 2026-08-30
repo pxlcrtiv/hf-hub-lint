@@ -37,3 +37,8 @@ Gated loading, pipelines, and most frameworks require config.json with model_typ
 
 A claimed accuracy with no eval set or methodology is worse than none. Report metric, dataset, and split together.
 
+
+## 2026-08-30 — Tip of the day: base_model is a legal field now
+
+Derivative models should declare base_model — licensing and attribution of fine-tunes depend on it.
+
