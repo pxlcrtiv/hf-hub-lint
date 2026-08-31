@@ -42,3 +42,8 @@ A claimed accuracy with no eval set or methodology is worse than none. Report me
 
 Derivative models should declare base_model — licensing and attribution of fine-tunes depend on it.
 
+
+## 2026-08-31 — Tip of the day: Datasets are part of reproducibility
+
+Link the training data via the datasets field. It is the single biggest trust signal for ML repos.
+
