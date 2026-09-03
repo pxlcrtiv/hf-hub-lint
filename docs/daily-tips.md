@@ -57,3 +57,8 @@ Models with pipeline_tag render inference widgets on the Hub page — the fastes
 
 sdk: streamlit | gradio | static | docker | custom in frontmatter; an unbuildable Space is a dead link.
 
+
+## 2026-09-03 — Tip of the day: HTTPS or it didn't happen
+
+Plain http:// links in cards get flagged by scanners and often blocked by corporate proxies. Force https.
+
