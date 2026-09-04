@@ -62,3 +62,10 @@ sdk: streamlit | gradio | static | docker | custom in frontmatter; an unbuildabl
 
 Plain http:// links in cards get flagged by scanners and often blocked by corporate proxies. Force https.
 
+
+## 2026-09-04 — Tip of the day: Lint before you publish
+
+Run hf-hub-lint on a repo before sharing it — a 90+ score card takes 5 minutes and removes an obvious first impression problem.
+
+> `hf-hub-lint --fixture examples/fixture_model.json`
+
