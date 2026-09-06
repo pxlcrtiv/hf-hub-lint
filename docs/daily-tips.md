@@ -74,3 +74,10 @@ Run hf-hub-lint on a repo before sharing it — a 90+ score card takes 5 minutes
 
 A gated model's card is public even when weights are not — reviewers decide whether to request access based on it.
 
+
+## 2026-09-06 — Tip of the day: Deterministic linting scales
+
+Script hf-hub-lint --json into CI so card regressions fail the build before they ship to the Hub.
+
+> `hf-hub-lint org/model --format json`
+
