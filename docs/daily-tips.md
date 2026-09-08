@@ -86,3 +86,8 @@ Script hf-hub-lint --json into CI so card regressions fail the build before they
 
 Copy an excellent card (e.g. any top-100 model) and adapt it. The Sections check here flags what a template usually has.
 
+
+## 2026-09-08 — Tip of the day: Inference widgets need examples
+
+Add a widget example (sample input) to the card so the live widget shows real output on first load.
+
