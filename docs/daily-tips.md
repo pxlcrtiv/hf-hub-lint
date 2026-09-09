@@ -91,3 +91,8 @@ Copy an excellent card (e.g. any top-100 model) and adapt it. The Sections check
 
 Add a widget example (sample input) to the card so the live widget shows real output on first load.
 
+
+## 2026-09-09 — Tip of the day: Version your Hub repo
+
+Use git tags on Hub repos; the API exposes them and downstream users pin versions.
+
