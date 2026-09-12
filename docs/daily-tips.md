@@ -106,3 +106,8 @@ Include collection method, date, and license of source data — the #1 review qu
 
 UTF-8, no BOM, LF endings. Broken encodings make the card render garbled on the Hub.
 
+
+## 2026-09-12 — Tip of the day: Emoji are fine, noise is not
+
+A banner emoji or two is OK; a wall of them hurts searchability and looks spammy to reviewers.
+
