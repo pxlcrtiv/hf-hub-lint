@@ -111,3 +111,10 @@ UTF-8, no BOM, LF endings. Broken encodings make the card render garbled on the 
 
 A banner emoji or two is OK; a wall of them hurts searchability and looks spammy to reviewers.
 
+
+## 2026-09-13 — Tip of the day: CI-lint your own docs
+
+Add the linter to a pre-commit hook; catch CARD_TRIM before your README becomes a stub.
+
+> `pip install hf-hub-lint`
+
