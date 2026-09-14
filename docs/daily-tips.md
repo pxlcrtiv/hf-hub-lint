@@ -118,3 +118,8 @@ Add the linter to a pre-commit hook; catch CARD_TRIM before your README becomes 
 
 > `pip install hf-hub-lint`
 
+
+## 2026-09-14 — Tip of the day: The score is a heuristic
+
+hf-hub-lint scores metadata hygiene, not model quality. Use it as a checklist, not a judgment of the artifact.
+
