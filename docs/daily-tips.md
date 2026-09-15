@@ -123,3 +123,10 @@ Add the linter to a pre-commit hook; catch CARD_TRIM before your README becomes 
 
 hf-hub-lint scores metadata hygiene, not model quality. Use it as a checklist, not a judgment of the artifact.
 
+
+## 2026-09-15 — Tip of the day: Metadata debt compounds
+
+Fix metadata when the repo is fresh; nobody retrofits a model card on a 2-year-old repo.
+
+> `hf-hub-lint --strict org/model`
+
