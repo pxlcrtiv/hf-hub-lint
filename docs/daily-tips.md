@@ -130,3 +130,10 @@ Fix metadata when the repo is fresh; nobody retrofits a model card on a 2-year-o
 
 > `hf-hub-lint --strict org/model`
 
+
+## 2026-09-16 — Tip of the day: Model cards are your front page
+
+The README.md of a Hub repo renders before anything else — a card with Model Details, Uses, and Limitations sections converts viewers into users.
+
+> `hf-hub-lint org/model`
+
