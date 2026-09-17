@@ -137,3 +137,10 @@ The README.md of a Hub repo renders before anything else — a card with Model D
 
 > `hf-hub-lint org/model`
 
+
+## 2026-09-17 — Tip of the day: License before code
+
+A repo with no license is legally unusable for most companies. Set the license tag in Hub settings AND in the card frontmatter.
+
+> `hf-hub-lint org/model --format markdown`
+
