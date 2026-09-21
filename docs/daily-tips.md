@@ -159,3 +159,8 @@ YAML frontmatter in the card is parsed by the Hub into fields (license, tags, me
 
 Setting library_name (transformers, diffusers...) lets the Hub offer 'Use in Transformers' code snippets and auto-download.
 
+
+## 2026-09-21 — Tip of the day: config.json is not optional
+
+Gated loading, pipelines, and most frameworks require config.json with model_type. Always save_pretrained() it.
+
