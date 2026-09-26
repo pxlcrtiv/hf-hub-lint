@@ -184,3 +184,8 @@ Link the training data via the datasets field. It is the single biggest trust si
 
 Models with pipeline_tag render inference widgets on the Hub page — the fastest 'wow' for visitors.
 
+
+## 2026-09-26 — Tip of the day: Spaces need an explicit SDK
+
+sdk: streamlit | gradio | static | docker | custom in frontmatter; an unbuildable Space is a dead link.
+
