@@ -201,3 +201,8 @@ Run hf-hub-lint on a repo before sharing it — a 90+ score card takes 5 minutes
 
 > `hf-hub-lint --fixture examples/fixture_model.json`
 
+
+## 2026-09-29 — Tip of the day: Gated repos still need cards
+
+A gated model's card is public even when weights are not — reviewers decide whether to request access based on it.
+
