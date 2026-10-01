@@ -213,3 +213,8 @@ Script hf-hub-lint --json into CI so card regressions fail the build before they
 
 > `hf-hub-lint org/model --format json`
 
+
+## 2026-10-01 — Tip of the day: One model card template
+
+Copy an excellent card (e.g. any top-100 model) and adapt it. The Sections check here flags what a template usually has.
+
