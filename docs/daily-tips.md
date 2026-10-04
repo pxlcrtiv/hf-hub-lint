@@ -228,3 +228,8 @@ Add a widget example (sample input) to the card so the live widget shows real ou
 
 Use git tags on Hub repos; the API exposes them and downstream users pin versions.
 
+
+## 2026-10-04 — Tip of the day: Dataset cards need provenance
+
+Include collection method, date, and license of source data — the #1 review question for datasets.
+
