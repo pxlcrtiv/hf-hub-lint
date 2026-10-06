@@ -233,3 +233,8 @@ Use git tags on Hub repos; the API exposes them and downstream users pin version
 
 Include collection method, date, and license of source data — the #1 review question for datasets.
 
+
+## 2026-10-06 — Tip of the day: Emoji are fine, noise is not
+
+A banner emoji or two is OK; a wall of them hurts searchability and looks spammy to reviewers.
+
