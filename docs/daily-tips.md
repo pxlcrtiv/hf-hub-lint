@@ -238,3 +238,10 @@ Include collection method, date, and license of source data — the #1 review qu
 
 A banner emoji or two is OK; a wall of them hurts searchability and looks spammy to reviewers.
 
+
+## 2026-10-07 — Tip of the day: CI-lint your own docs
+
+Add the linter to a pre-commit hook; catch CARD_TRIM before your README becomes a stub.
+
+> `pip install hf-hub-lint`
+
