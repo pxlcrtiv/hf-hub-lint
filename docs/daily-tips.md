@@ -271,3 +271,8 @@ A repo with no license is legally unusable for most companies. Set the license t
 
 > `hf-hub-lint org/model --format markdown`
 
+
+## 2026-10-12 — Tip of the day: Tags drive discoverability
+
+Hub search, filters, and the Models/Datasets pages rank by tags. Aim for 5+ (framework, task, modality, language, license).
+
