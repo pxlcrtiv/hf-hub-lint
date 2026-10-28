@@ -107,7 +107,7 @@ Sample report: [examples/demo-report.md](examples/demo-report.md)
 
 ```text
 hf_hub_lint/
-  checks.py    # 14 pure, deterministic check functions (no I/O)
+  checks/      # 14 pure, deterministic check functions (no I/O) + registry
   fetch.py     # injectable public-Hub client (urllib only)
   engine.py    # scoring + severity ordering
   report.py    # text / markdown / JSON renderers
