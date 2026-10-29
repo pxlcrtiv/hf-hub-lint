@@ -360,3 +360,8 @@ Use git tags on Hub repos; the API exposes them and downstream users pin version
 
 Include collection method, date, and license of source data — the #1 review question for datasets.
 
+
+## 2026-10-29 — Tip of the day: Keep README encoding sane
+
+UTF-8, no BOM, LF endings. Broken encodings make the card render garbled on the Hub.
+
