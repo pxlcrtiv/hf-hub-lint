@@ -438,3 +438,8 @@ Derivative models should declare base_model — licensing and attribution of fin
 
 Link the training data via the datasets field. It is the single biggest trust signal for ML repos.
 
+
+## 2026-11-12 — Tip of the day: pipeline_tag == instant demo
+
+Models with pipeline_tag render inference widgets on the Hub page — the fastest 'wow' for visitors.
+
