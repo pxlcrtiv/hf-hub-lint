@@ -5,8 +5,9 @@ from pathlib import Path
 
 import pytest
 
-from hf_hub_lint.checks import Finding, applicable_checks, parse_card
+from hf_hub_lint.checks import Finding, applicable_checks
 from hf_hub_lint.engine import lint_payload
+from hf_hub_lint.frontmatter import parse_card as parse_card_result
 from hf_hub_lint.report import render_json, render_markdown, render_text
 
 FIX_DIR = Path(__file__).parent.parent / "hf_hub_lint" / "data" / "fixtures"
@@ -80,13 +81,64 @@ def test_config_json_missing_flags_config():
     assert any(f.id == "CONFIG_JSON" for f in res.findings)
 
 
+# ---------------------------------------------------------------- frontmatter seam
+
+
+def test_block_style_list_frontmatter_parses():
+    card = "---\nlicense: mit\ntags:\n  - nlp\n  - cv\n---\n\nBody"
+    result = parse_card_result(card)
+    assert result.success is True
+    assert result.data["tags"] == ["nlp", "cv"]
+
+
+def test_engine_surfaces_frontmatter_parse_error():
+    p = good_model()
+    p["card"] = "---\nnot a mapping\n- also not a mapping\n---\n\n" + "Detailed card. " * 40
+    res = lint_payload(p)
+    fm = [f for f in res.findings if f.id == "FRONTMATTER"]
+    assert len(fm) == 1
+    assert "no valid key: value pairs" in fm[0].detail
+
+
+def test_malformed_frontmatter_reports_parse_error():
+    card = "---\nnot a mapping\n- also not a mapping\n---\n\nBody"
+    result = parse_card_result(card)
+    assert result.success is False
+    assert result.data == {}
+    assert result.errors == ["frontmatter block contains no valid key: value pairs"]
+
+
+def test_mixed_frontmatter_forms_parse():
+    card = (
+        "---\n"
+        "license: apache-2.0\n"
+        "tags: [nlp, cv]\n"
+        "datasets:\n"
+        "  - imdb\n"
+        "  - squad\n"
+        "private: true\n"
+        "metric:\n"
+        "---\n\nBody"
+    )
+    result = parse_card_result(card)
+    assert result.success is True
+    assert result.data == {
+        "license": "apache-2.0",
+        "tags": ["nlp", "cv"],
+        "datasets": ["imdb", "squad"],
+        "private": True,
+        "metric": None,
+    }
+
+
 def test_frontmatter_parse():
     card = "---\nlicense: mit\ntags: [a, b]\nmetrics: [accuracy]\n---\n\nBody"
-    fm = parse_card(card)
-    assert fm["license"] == "mit"
-    assert fm["tags"] == ["a", "b"]
-    assert fm["metrics"] == ["accuracy"]
-    assert parse_card("no frontmatter here") is None
+    result = parse_card_result(card)
+    assert result.success is True
+    assert result.data["license"] == "mit"
+    assert result.data["tags"] == ["a", "b"]
+    assert result.data["metrics"] == ["accuracy"]
+    assert parse_card_result("no frontmatter here").success is False
 
 
 def test_check_determinism_and_order():

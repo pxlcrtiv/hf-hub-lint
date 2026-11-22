@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from hf_hub_lint.checks import Finding, applicable_checks, parse_card
+from hf_hub_lint.checks import Finding, applicable_checks
+from hf_hub_lint.frontmatter import parse_card
 
 SEVERITY_WEIGHT = {"error": 1.0, "warn": 0.5, "info": 0.0}
 BANDS = [(90, "A (excellent)"), (75, "B (good)"), (60, "C (needs work)"), (0, "D (poor)")]

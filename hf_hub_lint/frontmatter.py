@@ -43,10 +43,14 @@ def _yaml_block(text: str) -> str:
 
 
 def _simple_yaml(text: str) -> dict:
-    """Minimal YAML-subset parser: top-level `key: value` / `key: [a, b]`."""
+    """Minimal YAML-subset parser: `key: value`, `key: [a, b]`, or `key:` + `- item`."""
     out: dict[str, object] = {}
-    for line in text.splitlines():
-        line = line.strip()
+    lines = text.splitlines()
+    i = 0
+    while i < len(lines):
+        raw = lines[i]
+        line = raw.strip()
+        i += 1
         if not line or line.startswith(("#", "-")):
             continue
         if ":" not in line:
@@ -54,15 +58,35 @@ def _simple_yaml(text: str) -> dict:
         key, _, val = line.partition(":")
         key = key.strip().strip('"\'')
         val = val.strip()
-        if val.startswith("[") and val.endswith("]"):
-            inner = val[1:-1].strip()
-            out[key] = (
-                [v.strip().strip('"\'') for v in inner.split(",")] if inner else []
-            )
-        elif val in {"true", "false"}:
-            out[key] = val == "true"
-        elif val:
-            out[key] = val.strip('"\'')
+        if val:
+            if val.startswith("[") and val.endswith("]"):
+                inner = val[1:-1].strip()
+                out[key] = (
+                    [v.strip().strip('"\'') for v in inner.split(",")] if inner else []
+                )
+            elif val in {"true", "false"}:
+                out[key] = val == "true"
+            else:
+                out[key] = val.strip('"\'')
+            continue
+        # Empty value: consume an indented block-style list (`- item` lines).
+        key_indent = len(raw) - len(raw.lstrip())
+        items: list[str] = []
+        j = i
+        while j < len(lines):
+            item_raw = lines[j]
+            item = item_raw.strip()
+            item_indent = len(item_raw) - len(item_raw.lstrip())
+            if item.startswith("-") and item_indent > key_indent:
+                items.append(item[1:].strip().strip('"\''))
+                j += 1
+            elif not item or item.startswith("#"):
+                j += 1
+            else:
+                break
+        if items:
+            out[key] = items
+            i = j
         else:
             out[key] = None
     return out
@@ -93,6 +117,14 @@ def parse_card(card: str | None) -> FrontmatterParseResult:
         )
 
     data = _simple_yaml(block)
+    has_content = any(
+        ln.strip() and not ln.strip().startswith("#") for ln in block.splitlines()
+    )
+    if not data and has_content:
+        return FrontmatterParseResult(
+            raw_block=block,
+            errors=["frontmatter block contains no valid key: value pairs"],
+        )
     return FrontmatterParseResult(
         data=data,
         raw_block=block,

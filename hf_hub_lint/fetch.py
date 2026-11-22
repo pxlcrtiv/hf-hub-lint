@@ -69,7 +69,7 @@ class HubClient:
             "repo_id": repo_id,
             "type": repo_type,
             "card": card,
-            "frontmatter": None,  # filled by engine via checks.parse_card
+            "frontmatter": None,  # engine replaces with its single frontmatter.parse_card result
             "meta": meta,
             "files": files,
         }

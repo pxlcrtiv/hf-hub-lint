@@ -6,7 +6,7 @@ Every check is a pure function over a normalized payload dict:
         "repo_id": str,
         "type": "model" | "dataset" | "space",
         "card": str | None,            # README.md / model card text
-        "frontmatter": dict | None,    # parsed YAML-ish card metadata
+        "frontmatter": FrontmatterParseResult,  # single parse of the card
         "meta": dict | None,           # HF API metadata (tags, license, ...)
         "files": list[str] | None,     # file names at repo root
     }
@@ -19,12 +19,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from hf_hub_lint.frontmatter import (
-    _yaml_block,
-)
-from hf_hub_lint.frontmatter import (
-    parse_card as _parse_card_full,
-)
+from hf_hub_lint.frontmatter import FrontmatterParseResult
 
 # Recognized repository types on the Hub.
 VALID_SPACE_SDKS = {"streamlit", "gradio", "static", "docker", "custom"}
@@ -64,7 +59,11 @@ class Check:
 
 
 def _fm(payload) -> dict:
-    return payload.get("frontmatter") or {}
+    """Read parsed metadata from the single frontmatter result in the payload."""
+    result = payload.get("frontmatter")
+    if isinstance(result, FrontmatterParseResult):
+        return result.data
+    return result or {}
 
 
 def _meta(payload) -> dict:
@@ -100,12 +99,25 @@ def ch_card_length(p: dict) -> list[Finding]:
 
 
 def ch_frontmatter(p: dict) -> list[Finding]:
-    if _yaml_block(p.get("card") or "").strip():
-        return []
+    """Report frontmatter problems from the engine's single parse result."""
+    result = p.get("frontmatter")
+    if isinstance(result, FrontmatterParseResult):
+        if result.success:
+            return []
+        errors = list(result.errors)
+    else:
+        errors = []
+        if result:  # tolerate a pre-parsed dict passed directly to the check
+            return []
+    detail = (
+        "The Hub renders structured metadata (license, tags, metrics) from the card's frontmatter block."
+    )
+    if errors:
+        detail += " " + "; ".join(errors) + "."
     return [Finding(
         id="FRONTMATTER", severity="warn",
         title="No YAML frontmatter in the card",
-        detail="The Hub renders structured metadata (license, tags, metrics) from the card's frontmatter block.",
+        detail=detail,
         fix="Start README.md with a --- delimited block of key: value pairs.",
     )]
 
@@ -305,9 +317,3 @@ CHECKS: list[Check] = [
 
 def applicable_checks(repo_type: str) -> list[Check]:
     return [c for c in CHECKS if repo_type in c.applies_to]
-
-
-def parse_card(card: str | None) -> dict | None:
-    """Backward-compatible wrapper: return dict | None from the new parser."""
-    result = _parse_card_full(card)
-    return result.data if result.success else None
