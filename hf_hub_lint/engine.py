@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from hf_hub_lint.checks import Finding, applicable_checks
+from hf_hub_lint.checks import Finding, run_checks
 from hf_hub_lint.frontmatter import parse_card
 
 SEVERITY_WEIGHT = {"error": 1.0, "warn": 0.5, "info": 0.0}
@@ -33,41 +33,26 @@ class LintResult:
 
 
 def lint_payload(payload: dict) -> LintResult:
-    """Run all applicable checks; payloads come from HubClient.normalize()
-    or from a fixture file (same shape)."""
+    """Run all applicable checks; payloads come from HubClient.normalize() or a fixture file.
+
+    The checks module is collapsed behind ``run_checks(payload, repo_type)``, which
+    handles dispatch, dedup and sort. This function adds the score, band and
+    severity counts on top.
+    """
     payload = dict(payload)
     payload["frontmatter"] = parse_card(payload.get("card"))
 
     repo_type = payload.get("type", "model")
     result = LintResult(repo_id=payload.get("repo_id", "?"), repo_type=repo_type)
-    findings: list[Finding] = []
-    for check in applicable_checks(repo_type):
-        got = check.run(payload)
-        if got:
-            findings.extend(got)
+    result.findings = run_checks(payload, repo_type)
 
-    # Dedupe by (id, severity) — a check may legitimately fire variations.
-    seen: set[tuple[str, str]] = set()
-    unique: list[Finding] = []
-    for f in findings:
-        key = (f.id, f.severity)
-        if key in seen:
-            continue
-        seen.add(key)
-        unique.append(f)
+    result.errors = sum(1 for f in result.findings if f.severity == "error")
+    result.warnings = sum(1 for f in result.findings if f.severity == "warn")
+    result.infos = sum(1 for f in result.findings if f.severity == "info")
 
-    # Order: severity desc, then id asc (deterministic).
-    order = {"error": 0, "warn": 1, "info": 2}
-    unique.sort(key=lambda f: (order.get(f.severity, 3), f.id))
-
-    result.findings = unique
-    result.errors = sum(1 for f in unique if f.severity == "error")
-    result.warnings = sum(1 for f in unique if f.severity == "warn")
-    result.infos = sum(1 for f in unique if f.severity == "info")
-
-    if unique:
+    if result.findings:
         # Weighted penalty: 100 − Σ(weight × 12) per finding, floor 5.
-        penalty = sum(SEVERITY_WEIGHT[f.severity] for f in unique) * 12
+        penalty = sum(SEVERITY_WEIGHT[f.severity] for f in result.findings) * 12
         result.score = max(5.0, 100.0 - penalty)
     result.score = round(result.score, 1)
     result.band = next(b for cutoff, b in BANDS if result.score >= cutoff)

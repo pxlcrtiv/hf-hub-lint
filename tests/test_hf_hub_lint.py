@@ -1,11 +1,12 @@
 """Offline test suite for hf-hub-lint — no network, deterministic."""
 
 import json
+from collections import defaultdict
 from pathlib import Path
 
 import pytest
 
-from hf_hub_lint.checks import Finding, applicable_checks
+from hf_hub_lint.checks import Finding, run_checks
 from hf_hub_lint.engine import lint_payload
 from hf_hub_lint.frontmatter import parse_card as parse_card_result
 from hf_hub_lint.report import render_json, render_markdown, render_text
@@ -150,13 +151,6 @@ def test_check_determinism_and_order():
     assert sevs == sorted(sevs, key={"error": 0, "warn": 1, "info": 2}.get)
 
 
-def test_applicable_checks_by_type():
-    model_ids = {c.id for c in applicable_checks("model")}
-    space_ids = {c.id for c in applicable_checks("space")}
-    assert "CONFIG_JSON" in model_ids and "SPACE_SDK" not in model_ids
-    assert "SPACE_SDK" in space_ids and "CONFIG_JSON" not in space_ids
-
-
 def test_score_floor_and_band():
     bad = good_model()
     bad["card"] = ""
@@ -189,11 +183,6 @@ def test_clean_payload_no_findings():
     p["card"] = p["card"].replace("license: mit\n", "")
     res2 = lint_payload(p)
     assert any(f.id == "LICENSE_MISSING" for f in res2.findings)
-
-
-def test_finding_dataclass_fields():
-    f = Finding(id="X", severity="warn", title="t", detail="d", fix="f")
-    assert f.applies_to == ("model", "dataset", "space")
 
 
 # CLI (offline paths only)
@@ -243,6 +232,66 @@ def test_cli_force_type():
     # A model payload forced to 'space' runs space checks only -> SDK finding.
     rc = main(["--fixture", str(FIX_DIR / "fixture_model.json"), "--type", "space"])
     assert rc == 0
+
+
+# ---------------------------------------------------------------- run_checks: public seam
+
+
+def test_run_checks_exists():
+    from hf_hub_lint.checks import run_checks
+
+    p = good_model()
+    findings = run_checks(p, "model")
+    assert isinstance(findings, list)
+    assert all(isinstance(f, Finding) for f in findings)
+
+
+def test_run_checks_dispatches_by_repo_type():
+    # A model payload without config.json must fire CONFIG_JSON (a model-only
+    # check), and must not fire any space-only check.
+    model = {
+        "repo_id": "x/y",
+        "type": "model",
+        "card": "---\nlibrary_name: transformers\n--- Body with http://example.com\n",
+        "meta": {"license": "mit", "library_name": "transformers"},
+        "files": ["README.md"],
+    }
+    model_f = run_checks(model, "model")
+    assert any(f.id == "CONFIG_JSON" for f in model_f)
+    assert not any(f.id == "SDK_MISSING" for f in model_f)
+
+    # The same payload forced to "space" now runs space checks only.
+    space_f = run_checks(dict(model, type="space"), "space")
+    assert any(f.id == "SDK_MISSING" for f in space_f)
+    assert not any(f.id == "CONFIG_JSON" for f in space_f)
+    assert not any(f.id == "METRICS" for f in space_f)
+
+
+def test_run_checks_orders_by_severity_then_id():
+    p = load("fixture_model.json")
+    findings = run_checks(p, "model")
+    order = {"error": 0, "warn": 1, "info": 2}
+    sevs = [f.severity for f in findings]
+    assert sevs == sorted(sevs, key=lambda s: order[s])
+    groups = defaultdict(list)
+    for f in findings:
+        groups[f.severity].append(f.id)
+    for ids in groups.values():
+        assert ids == sorted(ids)
+
+
+def test_run_checks_findings_use_single_source_id_severity_title():
+    p = good_model()
+    findings = run_checks(p, "model")
+    assert findings
+    f = findings[0]
+    assert f.id
+    assert f.severity in {"error", "warn", "info"}
+    assert f.title
+    assert f.detail
+    assert f.fix
+    # Dispatch is via the check registry, not a per-finding applies_to.
+    assert not hasattr(f, "applies_to")
 
 
 @pytest.fixture(autouse=True)
