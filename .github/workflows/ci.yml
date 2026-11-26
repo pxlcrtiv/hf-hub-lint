@@ -27,7 +27,13 @@ jobs:
       - name: Smoke — offline fixture lint
         run: |
           hf-hub-lint --fixture hf_hub_lint/data/fixtures/fixture_model.json | grep -q "Score:"
-          hf-hub-lint --fixture hf_hub_lint/data/fixtures/fixture_dataset.json --strict; test $? -eq 1
+          # Actions runs steps under `bash -e`, so the expected exit 1 would
+          # abort the step before we can assert it. Capture it explicitly.
+          set +e
+          hf-hub-lint --fixture hf_hub_lint/data/fixtures/fixture_dataset.json --strict
+          strict_status=$?
+          set -e
+          test "$strict_status" -eq 1
           hf-hub-lint --fixture hf_hub_lint/data/fixtures/fixture_model.json --format json | grep -q '"score"'
 
   lint:
