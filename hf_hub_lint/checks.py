@@ -13,6 +13,23 @@ Every check is a pure function over a normalized payload dict:
 
 Checks MUST be deterministic and MUST NOT do I/O (no network, no fs).
 Findings carry (id, severity, title, detail, fix).
+
+Public interface
+----------------
+run_checks(payload, repo_type) -> list[Finding]
+    Dispatch every check applicable to ``repo_type``, collect their findings,
+    dedupe by (id, severity), sort by severity desc then id asc, and return.
+
+A finding's id/severity/title is the SINGLE SOURCE OF TRUTH: it is authored
+by the check that produces it, and no registry entry holds a separate copy
+that can drift (the old Check.id/severity/title were deleted).
+
+Fields removed after the refactor
+---------------------------------
+- Check.id / Check.severity / Check.title: no longer stored on the registry
+  entry; each finding carries its own (single-sourced) id/severity/title.
+- Finding.applies_to: no longer used; dispatch is resolved by the Check
+  registry's applies_to, so a per-finding applies_to is dead surface.
 """
 
 from __future__ import annotations
@@ -32,8 +49,7 @@ KNOWN_LICENSES = {
     "cc-by-sa-4.0", "cc-by-nc-4.0", "cc-by-nc-sa-4.0", "gpl-2.0", "gpl-3.0",
     "lgpl-2.1", "lgpl-3.0", "agpl-3.0", "mpl-2.0", "other", "unknown",
     "unlicense", "openrail", "bigscience-openrail-m", "bigcode-openrail-m",
-    "openrail++", "creativeml-openrail-m", "deepfloyd-if-license", "bsl-1.0",
-    "llama2", "llama3", "llama3.1", "llama3.2", "gemma", "gemma2", "gemma3",
+    "openrail++", "creativeml-openrail-m", "deepfloyd-if-license", "bsl-1.0", "llama2", "llama3", "llama3.1", "llama3.2", "gemma", "gemma2", "gemma3",
     "qwen", "qwen2", "qwen2.5", "microsoft-research-license", "fair", "falcon-180b",
 }
 FRONTMATTER_KEYS = {"license", "tags", "datasets", "base_model", "metrics", "library_name", "language", "pipeline_tag", "sdk", "widget"}
@@ -46,16 +62,12 @@ class Finding:
     title: str
     detail: str = ""
     fix: str = ""
-    applies_to: tuple[str, ...] = ("model", "dataset", "space")
 
 
 @dataclass
 class Check:
-    id: str
-    severity: str
-    title: str
     applies_to: tuple[str, ...]
-    run: callable  # (payload, meta_defaults) -> list[Finding] | None
+    run: callable  # (payload) -> list[Finding] | None
 
 
 def _fm(payload) -> dict:
@@ -298,22 +310,52 @@ def ch_card_sections(p: dict) -> list[Finding]:
 
 
 CHECKS: list[Check] = [
-    Check("CARD_MISSING", "error", "Model card present", ("model", "dataset", "space"), ch_card_present),
-    Check("CARD_TRIM", "info", "Card not a stub", ("model", "dataset", "space"), ch_card_length),
-    Check("FRONTMATTER", "warn", "Structured metadata", ("model", "dataset", "space"), ch_frontmatter),
-    Check("LICENSE", "error", "License declared", ("model", "dataset", "space"), ch_license),
-    Check("TAGS_MIN", "info", "Discoverable tags", ("model", "dataset", "space"), ch_tags),
-    Check("LIBRARY_NAME", "warn", "library_name", ("model",), ch_library),
-    Check("DATASETS_FIELD", "info", "Datasets referenced", ("model", "dataset"), ch_datasets),
-    Check("BASE_MODEL", "info", "base_model declared", ("model",), ch_base_model),
-    Check("METRICS", "info", "Evaluation metrics", ("model",), ch_metrics),
-    Check("CONFIG_JSON", "warn", "config.json present", ("model",), ch_config_json),
-    Check("SPACE_SDK", "error", "Space SDK declared", ("space",), ch_space_sdk),
-    Check("PIPELINE_TAG", "warn", "pipeline_tag set", ("model",), ch_pipeline_tag),
-    Check("INSECURE_URL", "warn", "No plain-HTTP links", ("model", "dataset", "space"), ch_http_links),
-    Check("CARD_SECTIONS", "info", "Card sections complete", ("model", "dataset"), ch_card_sections),
+    Check(applies_to=("model", "dataset", "space"), run=ch_card_present),
+    Check(applies_to=("model", "dataset", "space"), run=ch_card_length),
+    Check(applies_to=("model", "dataset", "space"), run=ch_frontmatter),
+    Check(applies_to=("model", "dataset", "space"), run=ch_license),
+    Check(applies_to=("model", "dataset", "space"), run=ch_tags),
+    Check(applies_to=("model",), run=ch_library),
+    Check(applies_to=("model", "dataset"), run=ch_datasets),
+    Check(applies_to=("model",), run=ch_base_model),
+    Check(applies_to=("model",), run=ch_metrics),
+    Check(applies_to=("model",), run=ch_config_json),
+    Check(applies_to=("space",), run=ch_space_sdk),
+    Check(applies_to=("model",), run=ch_pipeline_tag),
+    Check(applies_to=("model", "dataset", "space"), run=ch_http_links),
+    Check(applies_to=("model", "dataset"), run=ch_card_sections),
 ]
 
 
-def applicable_checks(repo_type: str) -> list[Check]:
-    return [c for c in CHECKS if repo_type in c.applies_to]
+def run_checks(payload: dict, repo_type: str) -> list[Finding]:
+    """Run every check applicable to ``repo_type`` and return its findings.
+
+    The single interface for the checks module. It:
+      1. dispatches each check to those whose ``applies_to`` covers ``repo_type``,
+      2. runs the check body against the payload,
+      3. dedupe findings by (id, severity),
+      4. sorts by severity (error < warn < info) then id ascending,
+      5. returns the resulting list of Findings.
+
+    The Finding's id/severity/title is the single source of truth (defined in
+    the check body, not duplicated in a registry entry).
+    """
+    findings: list[Finding] = []
+    for check in CHECKS:
+        if repo_type in check.applies_to:
+            got = check.run(payload)
+            if got:
+                findings.extend(got)
+
+    seen: set[tuple[str, str]] = set()
+    unique: list[Finding] = []
+    for f in findings:
+        key = (f.id, f.severity)
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(f)
+
+    order = {"error": 0, "warn": 1, "info": 2}
+    unique.sort(key=lambda f: (order.get(f.severity, 3), f.id))
+    return unique
